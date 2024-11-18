@@ -4,7 +4,7 @@ import { service } from "../api/api";
 
 export function login(data){
     return service({
-        url:'/login',
+        url:'api/login',
         method:'post',
         headers: {
             'Content-Type': 'application/json'
@@ -16,7 +16,7 @@ export function login(data){
 
 export function logout() {
     return service({
-      url: '/logout',
+      url: 'api/logout',
       method: 'post'
     });
   }

@@ -2,7 +2,7 @@
 
 <template>
   <div class="login-form">
-    <h2>Connexion</h2>
+    <h2>objets</h2>
 
   
   </div>

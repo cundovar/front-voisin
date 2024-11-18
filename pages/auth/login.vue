@@ -2,12 +2,12 @@
     <div class="login-form">
       <form @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="username">nom</label>
           <input
-            v-model="email"
-            type="email"
-            id="email"
-            placeholder="Entrez votre email"
+            v-model="username"
+            type="text"
+            id="name"
+            placeholder="Entrez votre nom"
             required
           />
         </div>
@@ -27,6 +27,10 @@
       </form>
   
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <div class="mt-10 m-auto">
+        <NuxtLink   to="/auth/register">Pas encore de compte </NuxtLink>
+
+      </div>
     </div>
   </template>
   
@@ -37,7 +41,7 @@
   export default {
     data() {
       return {
-        email: '',
+        username: '',
         password: '',
         errorMessage: '',
       };
@@ -45,11 +49,11 @@
     methods: {
       async handleLogin() {
         try {
-          const response = await login({ email: this.email, password: this.password });
+          const response = await login({ username: this.username, password: this.password });
           
           const authStore = useAuthStore();
           authStore.login(response.data); // Stocke l'utilisateur et le token dans le store
-  
+              console.log("login",response.data)
           // Redirige après une connexion réussie
           this.$router.push({ path: '/' });
         } catch (error) {

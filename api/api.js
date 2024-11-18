@@ -2,41 +2,47 @@ import axios from "axios";
 import { ElMessage } from "element-plus";
 import { useAuthStore } from "../stores/auth";
 
+// Créez une instance Axios avec la configuration de base
+export const service = axios.create({
+  baseURL: "https://localhost:8000/",
+  withCredentials: true,
+  timeout: 5000,
+});
 
- export const service=axios.create({
-    baseURL:"https://localhost:8000/api" ,
-    withCredentials:true,
-    timeout:5000
-})
+export default defineNuxtPlugin((nuxtApp) => {
+  // Injecte Axios en tant que `$axios`
+  nuxtApp.provide('axios', service);
+});
 
-// Intercepteur de requêtes
+// Intercepteur de requêtes pour ajouter le token d'authentification
 service.interceptors.request.use(
-    config => {
-        const authSore= useAuthStore()
-        const token=authSore.token
-        if(token){
-            config.headers['Authorization']='Bearer ${token}'
-        }
-        return config
-    },
-    error =>{
-        console.error('erreur requete',error)
+  (config) => {
+    const authStore = useAuthStore(); // Accès au store Pinia
+    const token = authStore.token;
+    
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`; // Utilisation correcte des backticks
     }
-)
-// Intercepteur de réponses
+    return config;
+  },
+  (error) => {
+    console.error("Erreur requête", error);
+    return Promise.reject(error);
+  }
+);
+
+// Intercepteur de réponses pour gérer les erreurs et les messages
 service.interceptors.response.use(
-    response=>response,
-    error=>{
-        console.error('erreur reponse',error)
-     
+  (response) => response,
+  (error) => {
+    console.error("Erreur réponse", error);
 
-        ElMessage({
-            massage:error.message || 'erreur lors de la requète',
-            type:'error',
-            duration:5000
-        })
+    ElMessage({
+      message: error.message || "Erreur lors de la requête",
+      type: "error",
+      duration: 5000,
+    });
 
-        return Promise.reject(error)
-
-    }
-)
+    return Promise.reject(error);
+  }
+);

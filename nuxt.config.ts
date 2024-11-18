@@ -2,9 +2,17 @@
 import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
+  css: [
+    '~/assets/css/main.css'
+  ],
   modules: [
     '@vite-pwa/nuxt',
     '@pinia/nuxt',
+    '@nuxtjs/tailwindcss'
+  ],
+  plugins: [
+    '~/plugins/bootstrap.js',
+    '~/plugins/initAuth.client.js',
   ],
 
   pwa: {
