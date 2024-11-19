@@ -8,7 +8,8 @@ export default defineNuxtConfig({
   modules: [
     '@vite-pwa/nuxt',
     '@pinia/nuxt',
-    '@nuxtjs/tailwindcss'
+    '@nuxtjs/tailwindcss',
+    'pinia-plugin-persistedstate/nuxt',
   ],
   plugins: [
     '~/plugins/bootstrap.js',

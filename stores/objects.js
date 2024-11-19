@@ -63,4 +63,8 @@ export const useObjectsStore = defineStore('objects', {
       }
     },
   },
+  // pinia-plugin-persistedstate pour que les donné ne soit pas effacer au rafraichissement 
+  persist: true 
+  
+  
 });
