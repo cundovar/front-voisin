@@ -10,6 +10,8 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/tailwindcss',
     'pinia-plugin-persistedstate/nuxt',
+    '@pinia-orm/nuxt'
+
   ],
   plugins: [
     '~/plugins/bootstrap.js',

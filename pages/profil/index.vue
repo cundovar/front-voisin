@@ -16,8 +16,9 @@
 
        
         <p>compte de {{ authStore.user?.username }}</p>
+        <p>email : {{ authStore.user?.email }}</p>
 
-    <
+    
         <h3>Objets :</h3>
         <button class="btn btn-danger w-1/6 m-2 ">ajouter</button>
         <div class="flex space-x-2">

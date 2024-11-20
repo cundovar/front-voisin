@@ -46,3 +46,8 @@ service.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const publicService=axios.create({
+  baseURL:"https://localhost:8000/api",
+  timeout:5000
+})
