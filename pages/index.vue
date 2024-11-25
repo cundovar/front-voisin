@@ -14,28 +14,28 @@
   </div>
 </template>
 
-<script>
-import Objet from '~/models/ObjetModel';
+<script setup>
+import { ref, onMounted } from 'vue';
 import { useRepo } from 'pinia-orm';
+import Objet from '~/models/ObjetModel';
+import { useObjectsStore } from '~/stores/objects';
 
-export default {
-  async setup() {
-    const repo = useRepo(Objet);
+const store = useObjectsStore();
+const repo = useRepo(Objet);
+const objets = ref([]);
+const isLoading = ref(true);
 
-    try {
-      await Objet.fetchAllObjet(); // Charger les objets via l'API
-
-      // Charger les objets avec leurs relations
-      const objets = repo.query().with('category').get();
-      return {
-        objets,
-      };
-    } catch (error) {
-      console.error('Erreur lors du chargement des objets:', error);
-      return {
-        objets: [],
-      };
+onMounted(async () => {
+  try {
+    if (repo.query().get().length === 0) {
+      // Charger les objets seulement s'ils ne sont pas déjà présents
+      await store.fetchAllObjet();
     }
-  },
-};
+    objets.value = repo.query().with('category').get(); // Récupérer les objets avec leurs relations
+  } catch (error) {
+    console.error('Erreur lors du chargement des objets :', error);
+  } finally {
+    isLoading.value = false; // Fin du chargement
+  }
+});
 </script>

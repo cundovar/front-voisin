@@ -25,8 +25,19 @@
 
             <div v-for="objet in objects" :key="objet.id" class="p-2 border bg-amber-100 relative">
                 <div class="absolute top-0 right-0">
-            editer
-            supprimer
+            modifier
+            <div class="">
+              <!-- Boutons Editer et Supprimer -->
+            
+              <DeleteButton
+                :deleteAction="deleteObject"
+                :itemId="objet.id"
+                itemType="objet"
+                @deleted="handleObjectDeleted"
+              >
+                
+              </DeleteButton>
+            </div>
         </div>
                 <ul class="mt-5" >
                   <li >
@@ -53,6 +64,7 @@
 
 <script setup>
 import { onMounted } from "vue";
+import DeleteButton from "~/components/buttons/DeleteButton.vue";
 import { useAuthStore } from "~/stores/auth";
 import { useObjectsStore } from "~/stores/objects";
 
@@ -63,4 +75,24 @@ const objects = objectStore.objects;
 console.log("object", objects);
 
 objectStore.fetchUserObjects();
+
+// Fonction pour supprimer un objet
+async function deleteObject(objectId) {
+  const userId = authStore.user.id;
+  const token = authStore.token;
+
+  try {
+    await objectStore.deleteObjetId(userId, objectId, token); // Appel à la fonction de suppression du store
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l'objet :", error);
+  }
+}
+
+// Gestion de l'objet supprimé
+function handleObjectDeleted(deletedId) {
+  console.log(`Objet avec l'ID ${deletedId} supprimé`);
+  objectStore.objects = objectStore.objects.filter((o) => o.id !== deletedId); // Mise à jour locale
+}
+
+
 </script>

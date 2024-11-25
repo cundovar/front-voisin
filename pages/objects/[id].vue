@@ -4,64 +4,45 @@
     <p><strong>Nom :</strong> {{ object.title }}</p>
     <p><strong>Description :</strong> {{ object.description }}</p>
     <p><strong>Catégorie :</strong> {{ object.category?.name }}</p>
-    <p><strong>Utilisateur :</strong> {{ object.user?.name }}</p>
+    <p><strong>posté par :</strong> {{ object.user?.name }}</p>
   </div>
   <div v-else>
-    <p>Chargement en cours...</p>
+    <p>Chargement en cours ou objet introuvable...</p>
   </div>
 </template>
 
 <script setup>
-import { useRepo } from 'pinia-orm';
-import Objet from '~/models/ObjetModel';
+import { computed, onMounted } from 'vue';
+import { useObjectsStore } from '~/stores/objects';
+import { useRoute } from 'vue-router';
 
-// Utiliser `useAsyncData` pour charger les données dynamiques
-const { data: object, error } = await useAsyncData(async () => {
-  const repo = useRepo(Objet);
-
-  try {
-// Obtenir l'ID depuis la route
 const route = useRoute();
-console.log('route',route)
+const store = useObjectsStore();
 
-const objectId = route.params.id;
-console.log('routeParam',route.params)
-
-const { data: object, error } = await useAsyncData(async () => {
-  const repo = useRepo(Objet);
-
-  // Vérifier si l'objet est déjà dans le store
-  const object = repo.query()
-    .with('category')
-    .with('user')
-    .find(objectId);
-
-  if (!object) {
-    // Si l'objet n'existe pas, charger depuis l'API
-    await Objet.fetchAllObjet();
-    object = repo.query()
-      .with('category')
-      .with('user')
-      .find(objectId);
-
-    if (!object) {
-      throw new Error('Objet introuvable');
-    }
+const object = computed(() => store.currentObjet); // Lier `store.currentObjet` au template
+console.log('currentobjet',object)
+onMounted(async () => {
+  try {
+    await store.fetchOneObjet(route.params.id); // Charger l'objet via l'ID de la route
+   
+  } catch (error) {
+    console.error('Erreur lors du chargement de l\'objet :', error);
   }
 
-  return object;
-});
+// 1  computed : Propriété Calculée
+// computed est une méthode fournie par Vue.js pour créer des propriétés calculées. Une propriété calculée est dérivée d'autres données réactives, et elle est mise à jour automatiquement lorsque les données dont elle dépend changent.
 
+// Caractéristiques :
+// Réactivité : Les propriétés calculées réagissent automatiquement aux changements des données dont elles dépendent.
+// Caching : La valeur calculée est mise en cache et ne sera recalculée que si ses dépendances changent.
+// Lecture seule : Les propriétés calculées ne modifient pas directement les données, elles sont uniquement dérivées de celles-ci.
 
+// 2 onMounted : Cycle de Vie du Composant
+// onMounted est un hook de cycle de vie de Vue 3 qui exécute une fonction une fois que le composant a été monté dans le DOM.
 
+// Caractéristiques :
+// Moment d'exécution : Il est appelé après que le composant a été monté (les éléments HTML générés sont ajoutés au DOM).
+// Utilisation typique : Charger des données, initialiser des événements ou effectuer des actions nécessitant que le DOM soit prêt.
 
-
-
- 
-
-  } catch (err) {
-    console.error('Erreur lors du chargement de l\'objet :', err);
-    return null; // Retourne null si l'objet est introuvable
-  }
 });
 </script>
