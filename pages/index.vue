@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Liste des Objets</h1>
-
+    <div>ici test nouvelle branche git</div>
     <ul class="flex space-x-2  flex-wrap">
       <NuxtLink v-for="object in objets" :key="object.id" :to="`/objects/${object.id}`">
         <li class="border p-6 bg-orange-300 " >

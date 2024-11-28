@@ -10,6 +10,7 @@
             placeholder="Entrez votre email"
             required
           />
+        
         </div>
         
         <div class="form-group">

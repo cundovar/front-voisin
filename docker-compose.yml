@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+   nuxt-app:
+      build:
+         context: .
+         dockerfile: Dockerfile
+      ports:
+         - "3000:3000" # Mapper le port 3000 du conteneur au port 3000 de l'hôte
+      volumes:
+         - .:/app # Partager les fichiers entre l'hôte et le conteneur
+         - /app/node_modules # Exclure les node_modules de l'hôte
+      stdin_open: true
+      tty: true
