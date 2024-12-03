@@ -24,8 +24,14 @@
         <div class="flex space-x-2">
 
             <div v-for="objet in objects" :key="objet.id" class="p-2 border bg-amber-100 relative">
-                <div class="absolute top-0 right-0">
-            modifier
+                <div class="absolute top-0 border  right-0">
+                  <NuxtLink :to="`/objects/${objet.id}/edit`">
+
+                    <button class="cursor-pointer" > 
+                       modifier
+                    </button>
+
+                  </NuxtLink>
             <div class="">
               <!-- Boutons Editer et Supprimer -->
             
@@ -45,7 +51,7 @@
         
                     <p><strong>Nom:</strong> {{ objet.title }}</p>
                     <p><strong>description:</strong> {{ objet.description }}</p>
-                    <p><strong>catégorie:</strong> {{ objet.categoryName }}</p>
+                    <p><strong>catégorie:</strong> {{ objet.category?.name}}</p>
                   </li>
                 </ul>
     

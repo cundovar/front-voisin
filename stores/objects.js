@@ -104,24 +104,42 @@ export const useObjectsStore = defineStore('objects', {
 
       this.currentObjet = objet; // Mettre à jour l'état
     },
+
+    async updateObjet(object){
+      try{
+        const response=await axios.put(`https://localhost:8000/api/objets/${object.id}`,object,
+          {
+            headers: {
+              'Content-Type': 'application/json', // En-tête attendu par le serveur
+            },
+          }
+        )
+        this.currentObjet=response.data
+      }catch(error){
+        console.error("erreur lors de la mise à jpour de l'objet ;",error)
+        throw error
+      }
+    },
+  
+    async deleteObjetId(userId,objetId,token){
+      
+  
+      try{
+         const response = await axios.delete(`https://localhost:8000/api/user/${userId}/objet/${objetId}`,
+         { headers:{
+            Authorization:`Bearer ${token}`}
+          },
+         )
+  
+  return response
+      }catch(error){
+        console.error("erreur supression objet")
+        throw error
+      }
+    },
+  
   },
 
-  async deleteObjetId(userId,objetId,token){
-    
-
-    try{
-       const response = await axios.delete(`https://localhost:8000/api/user/${userId}/objet/${objetId}`,
-       { headers:{
-          Authorization:`Bearer ${token}`}
-        },
-       )
-
-return response
-    }catch(error){
-      console.error("erreur supression objet")
-      throw error
-    }
-  },
 
   // Activer la persistance avec Pinia
   persist: true,

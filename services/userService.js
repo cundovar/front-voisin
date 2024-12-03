@@ -47,6 +47,7 @@ export const  updateUserProfile =async(userId,token,formData)=>{
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
+                
               }
         )
         return response.data; // Retourne les données mises à jour
