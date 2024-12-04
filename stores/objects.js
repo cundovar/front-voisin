@@ -105,11 +105,12 @@ export const useObjectsStore = defineStore('objects', {
       this.currentObjet = objet; // Mettre à jour l'état
     },
 
-    async updateObjet(object){
+    async updateObjet(object,userId){
       try{
-        const response=await axios.put(`https://localhost:8000/api/objets/${object.id}`,object,
+        const response=await axios.put(`https://localhost:8000/api/user/${userId}/objet/${object.id}`,object,
           {
             headers: {
+           
               'Content-Type': 'application/json', // En-tête attendu par le serveur
             },
           }
@@ -135,6 +136,33 @@ export const useObjectsStore = defineStore('objects', {
       }catch(error){
         console.error("erreur supression objet")
         throw error
+      }
+    },
+    async addOdjet(userId, token, newObjet) {
+      console.log('Données envoyées au backend :', newObjet);
+      try {
+        const response = await axios.post(
+          `https://localhost:8000/api/user/${userId}/objet`,
+          newObjet,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        const addedObjet = response.data.objet;
+        console.log('Réponse du backend :', addedObjet);
+        this.objects.push({
+          id: addedObjet.id,
+          title: addedObjet.title,
+          description: addedObjet.description,
+     
+        });
+        return addedObjet;
+      } catch (error) {
+        console.error('Erreur lors de l\'ajout :', error.response?.data || error);
+        throw error;
       }
     },
   

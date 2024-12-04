@@ -41,9 +41,9 @@
 import { computed, onMounted } from 'vue';
 import { useObjectsStore } from '~/stores/objects';
 import { useRoute } from 'vue-router';
+import { useAuthStore } from "~/stores/auth";
 
-
-
+const authStore = useAuthStore();
 const route=useRoute()
 const store=useObjectsStore()
 
@@ -60,8 +60,10 @@ onMounted(async ()=>{
 
 const updateObjet= async ()=>{
     try{
-        await store.updateObjet(object.value)
+        await store.updateObjet(object.value,authStore.user.id)
+        console.log("store.id : ", authStore.user.id);
         console.log("store.updateObjet : ", store.updateObjet);
+        
         alert('Objet mis à jour avec succès !')
     }catch(error){
         console.error('erreur lors de la mise à jour de l\'objet;',error)

@@ -20,7 +20,11 @@
 
     
         <h3>Objets :</h3>
-        <button class="btn btn-danger w-1/6 m-2 ">ajouter</button>
+        <NuxtLink :to="`/objects/add`">
+
+          <button class="btn btn-danger w-1/6 m-2 ">ajouter</button>
+
+        </NuxtLink>
         <div class="flex space-x-2">
 
             <div v-for="objet in objects" :key="objet.id" class="p-2 border bg-amber-100 relative">
