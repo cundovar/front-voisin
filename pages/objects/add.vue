@@ -19,9 +19,11 @@
 import { useObjectsStore } from '~/stores/objects';
 import { useAuthStore } from '~/stores/auth';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const store = useObjectsStore();
+const router=useRouter()
 
 const newObjet = ref({
   title: '',
@@ -38,6 +40,7 @@ const addNewObjet = async () => {
     );
     console.log('Après l\'appel de addOdjet'); // Vérifier si l'appel réussit
     alert('Objet ajouté avec succès');
+    router.push('/profil')
   } catch (error) {
     console.error('Erreur lors de l\'ajout de l\'objet:', error);
     alert('Erreur lors de l\'ajout de l\'objet');

@@ -26,7 +26,7 @@
 
         </NuxtLink>
         <div class="flex space-x-2">
-
+          <div v-if=" objects && objects.length > 0">
             <div v-for="objet in objects" :key="objet.id" class="p-2 border bg-amber-100 relative">
                 <div class="absolute top-0 border  right-0">
                   <NuxtLink :to="`/objects/${objet.id}/edit`">
@@ -49,19 +49,27 @@
               </DeleteButton>
             </div>
         </div>
-                <ul class="mt-5" >
+                <ul class="mt-20" >
                   <li >
-                    <!-- {{ objet }}// -->
-        
-                    <p><strong>Nom:</strong> {{ objet.title }}</p>
-                    <p><strong>description:</strong> {{ objet.description }}</p>
-                    <p><strong>catégorie:</strong> {{ objet.category?.name}}</p>
+           *
+
+                      <p><strong>Nom:</strong> {{ objet.title }}</p>
+                      <!-- <p><strong>id user:</strong> {{ objet.user.id }}</p> -->
+                      <p><strong>description:</strong> {{ objet.description }}</p>
+                      <p><strong>catégorie:</strong> {{ objet.category?.name}}</p>
+
+                      
+                    
                   </li>
                 </ul>
+                
+              
     
     
-    
-    
+            </div>
+            </div>
+            <div v-else>
+              <p>pas objet</p>
             </div>
 
 
@@ -81,10 +89,13 @@ import { useObjectsStore } from "~/stores/objects";
 const authStore = useAuthStore();
 const objectStore = useObjectsStore();
 
-const objects = objectStore.objects;
-console.log("object", objects);
-
-objectStore.fetchUserObjects();
+onMounted(() => {
+  objectStore.fetchUserObjects();
+  console.log("Objets de l'utilisateur connecté :", objectStore.objects);
+});
+const objects = computed(() =>
+objectStore.objects.filter((obj) => obj.user_id === authStore.user.id.toString())
+);
 
 // Fonction pour supprimer un objet
 async function deleteObject(objectId) {
@@ -92,7 +103,7 @@ async function deleteObject(objectId) {
   const token = authStore.token;
 
   try {
-    await objectStore.deleteObjetId(userId, objectId, token); // Appel à la fonction de suppression du store
+    await objectStore.deleteObjetId(userId, objectId, token);
   } catch (error) {
     console.error("Erreur lors de la suppression de l'objet :", error);
   }
@@ -100,9 +111,9 @@ async function deleteObject(objectId) {
 
 // Gestion de l'objet supprimé
 function handleObjectDeleted(deletedId) {
-  console.log(`Objet avec l'ID ${deletedId} supprimé`);
-  objectStore.objects = objectStore.objects.filter((o) => o.id !== deletedId); // Mise à jour locale
+  objectStore.objects = objectStore.objects.filter((o) => o.id !== deletedId);
 }
-
-
 </script>
+
+
+

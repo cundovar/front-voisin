@@ -5,8 +5,18 @@
     <ul class="flex space-x-2  flex-wrap">
       <NuxtLink v-for="object in objets" :key="object.id" :to="`/objects/${object.id}`">
         <li class="border p-6 bg-orange-300 " >
-         nom: {{ object.title }}
+          <p>
+            nom: {{ object.title }}
+
+          </p>
+         <div v-if="object.category?.name ">
+
            - Catégorie : {{ object.category?.name }}
+         </div>
+         <div v-else>
+          <p>pas de categorie</p>
+         </div>
+
         </li>
 
       </NuxtLink>
