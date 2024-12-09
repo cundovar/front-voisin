@@ -46,6 +46,8 @@ const route=useRoute()
 const store=useObjectsStore()
 const router = useRouter(); // Initialisez useRouter
 
+const objetId = route.params.objetId;
+console.log('Objet ID :', objetId);
 const object=computed(()=>store.currentObjet)
 console.log('curentobjé',object)
 const form=reactive({
@@ -61,6 +63,10 @@ onMounted(async ()=>{
         }
     }catch(error){
         console.error('erreur chargement objet',error)
+        if(!authStore.token){
+          router.push("/")
+
+        }
     }
 })
 
@@ -76,6 +82,7 @@ const updateObjet= async ()=>{
         router.push('/profil'); // Redirection
     }catch(error){
         console.error('erreur lors de la mise à jour de l\'objet;',error)
+        
         alert('une erreur est survenue')
     }
 }

@@ -18,7 +18,7 @@
          </div>
 
         </li>
-
+           
       </NuxtLink>
     </ul>
   </div>

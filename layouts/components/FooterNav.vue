@@ -40,6 +40,7 @@
 import { onMounted } from 'vue';
 import { useAuthStore } from "~/stores/auth";
 import { useRouter } from 'nuxt/app';
+
 //acceder au store d'indentifacation
 const authStore = useAuthStore();
 const router = useRouter();

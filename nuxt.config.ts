@@ -16,6 +16,8 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/bootstrap.js',
     '~/plugins/initAuth.client.js',
+    '~/plugins/websocket.client.js',
+    '~/plugins/messagesWebSocket.js'
   ],
 
   pwa: {

@@ -5,6 +5,7 @@ import { publicService } from '~/api/api';
 import { useRepo } from 'pinia-orm';
 import Objet from '~/models/ObjetModel';
 
+
 export const useObjectsStore = defineStore('objects', {
   state: () => ({
     objects: [],
@@ -13,6 +14,56 @@ export const useObjectsStore = defineStore('objects', {
   }),
 
   actions: {
+
+    initializeWebSocket() {
+      const socket = new WebSocket('ws://127.0.0.1:8080');
+  
+      socket.onopen = () => {
+          console.log('Connexion WebSocket établie');
+      };
+  
+      socket.onmessage = (event) => {
+          console.log('Message reçu :', event.data);
+  
+          try {
+              const message = JSON.parse(event.data);
+              const { action, objet } = message;
+  
+              if (action === 'update') {
+                  const index = this.objects.findIndex((o) => o.id === objet.id);
+                  if (index !== -1) {
+                      // Mettre à jour l'objet existant
+                      this.objects[index] = { ...this.objects[index], ...objet };
+                  }
+              } else if (action === 'delete') {
+                  // Supprimer un objet
+                  this.objects = this.objects.filter((o) => o.id !== objet.id);
+              } else if (action === 'add') {
+                  // Ajouter un nouvel objet
+                  this.objects.push(objet);
+              }
+          } catch (error) {
+              console.error('Erreur lors du traitement du message WebSocket :', error);
+          }
+      };
+  
+      socket.onerror = (error) => {
+          console.error('Erreur WebSocket :', error);
+      };
+  
+      socket.onclose = () => {
+          console.log('Connexion WebSocket fermée');
+      };
+  },
+     
+
+
+
+
+
+
+
+
     async fetchUserObjects() {
       const authStore = useAuthStore();
       try {
@@ -25,6 +76,7 @@ export const useObjectsStore = defineStore('objects', {
           }
         );
         console.log("Données brutes des objets : ", data);
+    
         const objects = data.map((objet) => ({
           id: objet.id,
           title: objet.title,
@@ -35,15 +87,18 @@ export const useObjectsStore = defineStore('objects', {
             name: objet.category?.name || 'Catégorie inconnue',
           },
         }));
-           console.log("constObjet",objects)
-        // Insérer les objets dans le store Pinia ORM
-        useRepo(Objet).save(objects);
-        this.objects = objects; // Mettre à jour le state
+    
+        // Supprimer tous les objets du repo pour éviter les doublons
+   
+        console.log("Objets sauvegardés dans le repo :", savedObjects);
+        useRepo(Objet).save(savedObjects);
+        // Mettre à jour l'état
+        this.objects = savedObjects;
       } catch (error) {
         console.error("Erreur lors de la récupération des objets de l'utilisateur :", error);
       }
     },
-
+    
     async fetchAllObjet() {
       try {
         const response = await publicService.get('/objets'); // Appel à l'API
@@ -118,11 +173,12 @@ export const useObjectsStore = defineStore('objects', {
     },
 
     async updateObjet(object,userId){
+      const authStore=useAuthStore()
       try{
         const response=await axios.put(`https://localhost:8000/api/user/${userId}/objet/${object.id}`,object,
           {
             headers: {
-           
+              Authorization: `Bearer ${authStore.token}`,
               'Content-Type': 'application/json', // En-tête attendu par le serveur
             },
           }

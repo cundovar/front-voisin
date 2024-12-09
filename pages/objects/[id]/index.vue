@@ -2,9 +2,10 @@
     <div v-if="object">
       <h1>Détails de l'Objet</h1>
       <p><strong>Nom :</strong> {{ object.title }}</p>
-      <p><strong>Description :</strong> {{ object.description }}</p>
+      <p><strong>id :</strong> {{ object.id }}</p>
       <p><strong>Catégorie :</strong> {{ object.category?.name }}</p>
       <p><strong>posté par :</strong> {{ object.user?.name }}</p>
+      <button @click="goToMessagePage(object)">Contacter le propriétaire</button> 
     </div>
     <div v-else>
       <p>Chargement en cours ou objet introuvable...</p>
@@ -14,12 +15,27 @@
   <script setup>
   import { computed, onMounted } from 'vue';
   import { useObjectsStore } from '~/stores/objects';
-  import { useRoute } from 'vue-router';
+  import { useRoute,useRouter } from 'vue-router';
   
   const route = useRoute();
   const store = useObjectsStore();
-  
+  const router = useRouter();
+
+
+  const goToMessagePage = (object) => {
+  router.push({
+    name: 'message',
+    query: {
+      objectId: object.id,
+      recipientId: object.user?.id, // L'utilisateur propriétaire de l'objet
+    },
+  });
+};
+
+
+
   const object = computed(() => store.currentObjet); // Lier `store.currentObjet` au template
+
   console.log('currentobjet',object)
   onMounted(async () => {
     try {

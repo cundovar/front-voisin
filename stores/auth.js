@@ -6,28 +6,26 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: null,
-    isAuthenticated: false,
   }),
-
+  getters: {
+    isAuthenticated: (state) => !!state.token, // Calculé dynamiquement en fonction du token
+  },
   actions: {
+    loadFromStorage() {
+      this.token = localStorage.getItem('authToken');
+      this.user = JSON.parse(localStorage.getItem('user'));
+    },
     initAuth() {
       if (process.client) {
-        const savedToken = localStorage.getItem('authToken');
-        // console.log("InitAuth - Token récupéré depuis localStorage:", savedToken);
-        if (savedToken) {
-          this.token = savedToken;
-          this.isAuthenticated = true;
-          // console.log("Token initialisé dans le store:", this.token);
-          // console.log("Appel de fetchUser dans initAuth");
-          this.fetchUser(); // Appeler fetchUser avec le token existant
-        } else {
-          console.log("Aucun token trouvé dans localStorage");
+        this.loadFromStorage();
+        if (this.token) {
+          this.fetchUser(); // Charger les informations utilisateur
         }
       }
     },
-
     async login(userData) {
       try {
+        // Mettre à jour les données utilisateur et le token
         this.user = {
           id: userData.id,
           email: userData.email,
@@ -35,48 +33,44 @@ export const useAuthStore = defineStore('auth', {
           roles: userData.roles,
         };
         this.token = userData.token;
-        this.isAuthenticated = true;
-        console.log("Token après connexion:", this.token);
 
-        // Stocker le token dans localStorage côté client
-        if (process.client) {
-          localStorage.setItem('authToken', this.token);
-        }
+        // Stocker dans le localStorage
+        localStorage.setItem('authToken', this.token);
+        localStorage.setItem('user', JSON.stringify(this.user));
+
+        console.log("Connexion réussie, token stocké:", this.token);
       } catch (error) {
         console.error("Erreur lors de la connexion :", error);
       }
     },
-
     logout() {
       // Réinitialiser l'état d'authentification
       this.user = null;
       this.token = null;
-      this.isAuthenticated = false;
 
-      // Supprimer le token du localStorage côté client
-      if (process.client) {
-        localStorage.removeItem('authToken');
-      }
+      // Supprimer les données du localStorage
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+
+      console.log("Déconnexion réussie.");
     },
 
+    
     async fetchUser() {
       if (!this.token) return;
 
       try {
-        // Utiliser l'instance Axios injectée par Nuxt
         const { $axios } = useNuxtApp();
         const response = await axios.get('https://localhost:8000/api/me', {
-            headers: {
-                'Authorization': `Bearer ${this.token}`,
-                'Content-Type': 'application/json'
-            }
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
         });
-        
-        this.user = response.data; // Stocker les données utilisateur
-        console.log("Réponse des données utilisateur:", response.data);
+        this.user = response.data; // Mettre à jour les informations utilisateur
+        console.log("Utilisateur récupéré:", response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération de l'utilisateur :", error);
-        this.logout(); // Déconnecter l'utilisateur si une erreur survient
+        this.logout(); // Déconnecter en cas d'erreur
       }
     },
   },

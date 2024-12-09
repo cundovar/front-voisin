@@ -45,7 +45,7 @@
   import { useAuthStore } from "~/stores/auth";
   import { updateUserProfile } from "~/services/userService";
   import { reactive } from "vue";
-  
+
   const authStore = useAuthStore();
   
   // Initialisation du formulaire avec les données utilisateur
