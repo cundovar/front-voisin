@@ -6,25 +6,30 @@ export const useMessagesStore = defineStore('messages', {
     usersCache: {}, // Stocke les utilisateurs avec leurs noms et IDs
   }),
   actions: {
-    // Ajoute un message à la liste
+    getMessagesBetween(senderId, recipientId) {
+      return this.messages.filter(
+        (msg) =>
+          (msg.sender === senderId && msg.recipient === recipientId) ||
+          (msg.sender === recipientId && msg.recipient === senderId)
+      );
+    },
+    async loadMessages(objectId, recipientId) {
+      try {
+        const response = await fetch(`https://localhost:8000/api/messages?objectId=${objectId}&recipient=${recipientId}`);
+        if (!response.ok) {
+          throw new Error(`Erreur lors du chargement des messages : ${await response.text()}`);
+        }
+    
+        const data = await response.json();
+        this.messages = data.messages;
+      } catch (error) {
+        console.error('Erreur :', error);
+      }
+    },
     addMessage(message) {
       this.messages.push(message);
     },
-    getMessagesBetween(userId1, userId2) {
-        return this.messages.filter(
-          (msg) =>
-            (msg.senderId === userId1 && msg.recipientId === userId2) ||
-            (msg.senderId === userId2 && msg.recipientId === userId1)
-        );
-      },
-      loadMessages(objectId, recipientId) {
-        // Simulez un chargement ou implémentez une API REST pour récupérer les messages
-        console.log('Chargement des messages pour l\'objet:', objectId, 'et le destinataire:', recipientId);
-        // Par exemple, si vous récupérez depuis un backend :
-        // axios.get(`/api/messages?objectId=${objectId}&recipientId=${recipientId}`).then((response) => {
-        //   this.messages = response.data;
-        // });
-      },
+  
 
     // Récupère tous les messages avec un utilisateur spécifique
     getMessagesWithUser(userId) {
@@ -73,3 +78,5 @@ export const useMessagesStore = defineStore('messages', {
     
   },
 });
+
+
