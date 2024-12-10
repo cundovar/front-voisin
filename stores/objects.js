@@ -77,27 +77,45 @@ export const useObjectsStore = defineStore('objects', {
         );
         console.log("Données brutes des objets : ", data);
     
-        const objects = data.map((objet) => ({
-          id: objet.id,
-          title: objet.title,
-          description: objet.description,
-          user_id: objet.user.split('/').pop(),
-          category: {
-            id: objet.category?.id,
-            name: objet.category?.name || 'Catégorie inconnue',
-          },
-        }));
+        // Mapper les données pour inclure des catégories valides
+    const objects = data.map((objet) => {
+      const category = objet.category
+        ? {
+            id: objet.category.split('/').pop(), // Extraire l'ID de la catégorie depuis l'URL
+            name: objet.category.name || 'Catégorie inconnue',
+          }
+        : {
+            id: `temp-${objet.id}`, // Générer un ID temporaire
+            name: 'Catégorie inconnue',
+          };
+
+      return {
+        id: objet.id,
+        title: objet.title,
+        description: objet.description,
+        user_id: objet.user.split('/').pop(), // Extraire l'ID de l'utilisateur depuis l'URL
+        category, // Associer la catégorie formatée
+      };
+    });
+        console.log("Objets formatés :", objects);
     
-        // Supprimer tous les objets du repo pour éviter les doublons
-   
-        console.log("Objets sauvegardés dans le repo :", savedObjects);
-        useRepo(Objet).save(savedObjects);
-        // Mettre à jour l'état
-        this.objects = savedObjects;
-      } catch (error) {
-        console.error("Erreur lors de la récupération des objets de l'utilisateur :", error);
-      }
-    },
+      // Sauvegarder les objets dans le dépôt
+      const repo = useRepo(Objet);
+      const savedObjects = await repo.save(objects);
+      console.log("Objets sauvegardés dans le repo :", savedObjects);
+
+      // Mettre à jour l'état du store
+      this.objects = savedObjects;
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des objets de l'utilisateur :",
+        error
+      );
+      // Ajouter une gestion d'erreur pour l'utilisateur ici si nécessaire
+    }
+  },
+
+
     
     async fetchAllObjet() {
       try {

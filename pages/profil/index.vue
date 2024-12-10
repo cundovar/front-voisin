@@ -82,25 +82,18 @@ onMounted(() => {
     router.push('/');
     return;
   }
+if(!objects.value){
 
-  objectStore.fetchUserObjects();
+    objectStore.fetchUserObjects();
+  }
   console.log("Objets de l'utilisateur connecté :", objectStore.objects);
   
 
   
-  // Initialiser WebSocket pour écouter les mises à jour des objets
-  objectStore.initializeWebSocket();
+
 });
 
-// Liste filtrée des objets pour l'utilisateur connecté
-const objects = computed(() =>
-
-objectStore.objects.filter(
-    (obj) => obj.user?.id === authStore.user.id.toString()
-  )
-);
-
-
+const objects=objectStore.objects
 // Fonction pour supprimer un objet
 async function deleteObject(objectId) {
   const userId = authStore.user.id;
