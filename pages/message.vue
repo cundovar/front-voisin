@@ -9,11 +9,19 @@
     </div>
 
     <!-- Liste des messages -->
+    <div v-for="(msg, index) in messages" :key="index" class="message-item">
+      {{ msg.content }}  
+
+    </div>
     <div v-if="messages.length > 0" class="messages-list">
       <div v-for="(msg, index) in messages" :key="index" class="message-item">
-        <p :class="msg.senderId === currentUser.id ? 'sent' : 'received'">
-          <strong>{{ msg.senderId === currentUser.id ? 'Vous' : recipientName }}:</strong>
-          {{ msg.content }}
+        <p :class="msg.sender === currentUser ? 'sent' : 'received'">
+          <strong>{{ msg.sender === currentUser ? 'Vous' : recipientName }}:</strong>
+          {{ msg.content }}  
+        </p>
+        
+        <p v-if="msg.object">
+          <em>Objet associé : {{ msg.object.name || 'ID ' + msg.object.id }}</em>
         </p>
       </div>
     </div>
@@ -28,6 +36,7 @@
     </form>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
@@ -101,17 +110,37 @@ const sendMessage = async () => {
   }
 
   const messageData = {
-  sender: currentUser.value.toString(), // Convertir en chaîne si nécessaire
-  recipient: recipientId.toString(),
-  content: newMessage.value.trim(),
-};
+          action: 'sendMessage',
+          sender: currentUser.value,
+          recipient: recipientId,
+          content: newMessage.value.trim(),
+          objectId:objectId
+      };
+  console.log('messagedata',messageData)
 
 try {
   const response = await fetch('https://localhost:8000/api/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(messageData),
+
+
   });
+
+   // Envoyer via WebSocket
+   $messagesSocket.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  if (message.action === 'receiveMessage' && message.message.recipient === currentUser.value) {
+    messagesStore.addMessage({
+      id: message.message.id,
+      content: message.message.content,
+      sender: message.message.sender,
+      recipient: message.message.recipient,
+      timestamp: message.message.timestamp,
+      object: message.message.object, // Inclut l'objet associé
+    });
+  }
+};
 
   if (!response.ok) {
     throw new Error(`Erreur API REST: ${await response.text()}`);

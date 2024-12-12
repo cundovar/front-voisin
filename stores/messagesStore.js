@@ -21,7 +21,17 @@ export const useMessagesStore = defineStore('messages', {
         }
     
         const data = await response.json();
-        this.messages = data.messages;
+     
+        // Transformez les données reçues pour inclure le bon format
+        this.messages = data.messages.map((msg) => ({
+          id: msg.id,
+          content: msg.content,
+          sender: msg.sender,
+          recipient: msg.recipient,
+          timestamp: msg.timestamp,
+          object: msg.object, // Inclure l'objet associé si nécessaire
+        }));
+        console.log('data',data.messages)
       } catch (error) {
         console.error('Erreur :', error);
       }
