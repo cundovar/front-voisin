@@ -188,6 +188,7 @@ export const useObjectsStore = defineStore('objects', {
       }
 
       this.currentObjet = objet; // Mettre à jour l'état
+      return objet
     },
 
     async updateObjet(object,userId){

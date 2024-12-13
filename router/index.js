@@ -31,8 +31,12 @@ const routes=[
   {
     path: '/message',
     name: 'message',
-    component: () => import('~/pages/message.vue'), // La page de messagerie
-  },
+    component: () => import('~/pages/message.vue'),
+    props: (route) => ({
+      objectId: route.query.objectId,
+      recipientId: route.query.recipientId,
+    }),
+  }
     
 ]
 

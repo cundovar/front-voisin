@@ -8,6 +8,7 @@ export default defineNuxtPlugin(() => {
     socket.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
+        console.log("message recu",message)
   
         if (message.action === 'receiveMessage') {
           // Utilisation du store pour ajouter le message reçu

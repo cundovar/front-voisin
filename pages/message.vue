@@ -1,6 +1,14 @@
 <template>
   <div>
     <h1>Messagerie</h1>
+    <div v-if="nameObjet">
+       <h2 > objet : {{ nameObjet}} </h2>
+
+
+    </div>
+    <div v-else>
+  <p>Chargement de l'objet...</p>
+</div>
     <div v-if="recipientName">
       <h2>Discussion avec {{ recipientName }}</h2>
     </div>
@@ -9,22 +17,19 @@
     </div>
 
     <!-- Liste des messages -->
-    <div v-for="(msg, index) in messages" :key="index" class="message-item">
-      {{ msg.content }}  
 
-    </div>
     <div v-if="messages.length > 0" class="messages-list">
-      <div v-for="(msg, index) in messages" :key="index" class="message-item">
-        <p :class="msg.sender === currentUser ? 'sent' : 'received'">
-          <strong>{{ msg.sender === currentUser ? 'Vous' : recipientName }}:</strong>
-          {{ msg.content }}  
-        </p>
-        
-        <p v-if="msg.object">
-          <em>Objet associé : {{ msg.object.name || 'ID ' + msg.object.id }}</em>
-        </p>
-      </div>
-    </div>
+    
+  <div v-for="(msg, index) in messages" :key="index" class="message-item">
+    <p :class="msg.sender === currentUser ? 'sent' : 'received'">
+      <strong>{{ msg.sender === currentUser ? 'Vous' : recipientName }}:</strong>
+      {{ msg.content }}
+    </p>
+    <p v-if="msg.object.id">
+      <em>Objet associé : {{  'ID ' + msg.object.id }}</em>
+    </p>
+  </div>
+</div>
     <div v-else>
       <p>Aucun message pour le moment.</p>
     </div>
@@ -37,30 +42,32 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useMessagesStore } from '~/stores/messagesStore';
 import { useAuthStore } from '~/stores/auth';
 import { useNuxtApp } from '#app';
+import { useObjectsStore } from '#build/imports';
 
 const route = useRoute();
 const { $messagesSocket } = useNuxtApp();
 
 const messagesStore = useMessagesStore();
 const userStore = useAuthStore();
-
+const objectSore=useObjectsStore()
 // Récupérer l'ID du destinataire et de l'objet
 const recipientId = route.query.recipientId;
 const objectId = route.query.objectId;
+console.log("objectID",objectId)
 
 // Nom du destinataire
 const recipientName = ref('');
 const newMessage = ref('');
-
+const nameObjet = ref(null)
 // Identifiant de l'utilisateur connecté
-const currentUser = computed(() => userStore.user?.id);
+const currentUser = computed(()=>userStore.user?.id)
+console.log("currentuser",currentUser)
 
 // Liste des messages échangés
 const messages = computed(() =>
@@ -73,9 +80,25 @@ onMounted(async () => {
     const recipient = await messagesStore.getRecipientName(recipientId);
     recipientName.value = recipient;
     await messagesStore.loadMessages(objectId, recipientId);
+
+ 
+    const fetchedObjet = await objectSore.fetchOneObjet(objectId.toString());
+    nameObjet.value = fetchedObjet ? fetchedObjet.title : 'Objet inconnu';
+ 
+    // Transformez les messages pour inclure `objectId` directement
+    messagesStore.messages = messagesStore.messages.map((msg) => ({
+      ...msg,
+      objectId: msg.object ? msg.object.id : null,
+    }));
   } catch (error) {
     console.error('Erreur lors du chargement des messages ou du destinataire :', error);
   }
+  // nom de l'objet pour le titre :
+  const fetchNameObjet= await objectSore.fetchOneObjet(objectId.toString())
+  nameObjet.value = fetchNameObjet ? fetchNameObjet.title : 'Objet inconnu'; // Assurez-vous que title existe dans l'objet
+  console.log('nameObjetzzz', nameObjet.value);
+  console.log("nameobjet",nameObjet)
+  console.log("nameobjettitle",nameObjet.title)
 });
 
 // Gestion WebSocket
@@ -109,48 +132,18 @@ const sendMessage = async () => {
     return;
   }
 
-  const messageData = {
-          action: 'sendMessage',
-          sender: currentUser.value,
-          recipient: recipientId,
-          content: newMessage.value.trim(),
-          objectId:objectId
-      };
-  console.log('messagedata',messageData)
-
-try {
-  const response = await fetch('https://localhost:8000/api/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(messageData),
-
-
+  const success = await messagesStore.sendMessage({
+    sender: currentUser.value,
+    recipient: recipientId,
+    content: newMessage.value,
+    objectId,
   });
 
-   // Envoyer via WebSocket
-   $messagesSocket.onmessage = (event) => {
-  const message = JSON.parse(event.data);
-  if (message.action === 'receiveMessage' && message.message.recipient === currentUser.value) {
-    messagesStore.addMessage({
-      id: message.message.id,
-      content: message.message.content,
-      sender: message.message.sender,
-      recipient: message.message.recipient,
-      timestamp: message.message.timestamp,
-      object: message.message.object, // Inclut l'objet associé
-    });
-  }
-};
-
-  if (!response.ok) {
-    throw new Error(`Erreur API REST: ${await response.text()}`);
-  }
-
-  console.log('Message sauvegardé via API REST.');
-} catch (error) {
-  console.error('Erreur lors de l\'envoi du message :', error);
-}finally {
-    newMessage.value = '';
+  if (success) {
+    console.log('Message envoyé avec succès');
+    newMessage.value = ''; // Réinitialiser le champ
+  } else {
+    console.error('Échec de l\'envoi du message.');
   }
 };
 </script>
