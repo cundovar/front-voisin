@@ -20,9 +20,9 @@
 
     <div v-if="messages.length > 0" class="messages-list">
     
-  <div v-for="(msg, index) in messages" :key="index" class="message-item">
-    <p :class="msg.sender === currentUser ? 'sent' : 'received'">
-      <strong>{{ msg.sender === currentUser ? 'Vous' : recipientName }}:</strong>
+  <div v-for="(msg, index) in messages" :key="msg.id" class="message-item">
+    <p :class="msg.sender === currentUser? 'sent' : 'received'">
+      <strong>{{ msg.sender === currentUser? 'Vous' : recipientName }}:</strong>
       {{ msg.content }}
     </p>
     <p v-if="msg.object.id">
@@ -56,6 +56,7 @@ const { $messagesSocket } = useNuxtApp();
 const messagesStore = useMessagesStore();
 const userStore = useAuthStore();
 const objectSore=useObjectsStore()
+
 // Récupérer l'ID du destinataire et de l'objet
 const recipientId = route.query.recipientId;
 const objectId = route.query.objectId;
@@ -68,12 +69,13 @@ const nameObjet = ref(null)
 // Identifiant de l'utilisateur connecté
 const currentUser = computed(()=>userStore.user?.id)
 console.log("currentuser",currentUser)
+console.log("currentuser1",userStore.user?.id)
 
 // Liste des messages échangés
-const messages = computed(() =>
-  messagesStore.getMessagesBetween(currentUser.value, recipientId)
-);
-
+const messages = computed(() => {
+  console.log('Messages affichés dans le DOM :', messagesStore.messages);
+  return messagesStore.messages;
+});
 // Charger le nom du destinataire et les messages existants
 onMounted(async () => {
   try {
@@ -99,6 +101,8 @@ onMounted(async () => {
   console.log('nameObjetzzz', nameObjet.value);
   console.log("nameobjet",nameObjet)
   console.log("nameobjettitle",nameObjet.title)
+  console.log('Messages disponibles dans le store :', messagesStore.messages);
+console.log('Messages filtrés affichés dans le DOM :', messages.value);
 });
 
 // Gestion WebSocket
@@ -108,11 +112,17 @@ if ($messagesSocket) {
   };
 
   $messagesSocket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    if (message.action === 'receiveMessage' && message.message.recipientId === currentUser.value) {
-      messagesStore.addMessage(message.message);
-    }
-  };
+  const message = JSON.parse(event.data);
+  console.log('Nouveau message reçu :', message);
+
+  if (
+    message.action === 'receiveMessage' &&
+    (message.message.sender === recipientId || message.message.recipient === recipientId)
+  ) {
+    messagesStore.addMessage(message.message);
+    console.log("message.message",message.message)
+  }
+};
 
   $messagesSocket.onerror = (error) => {
     console.error('Erreur WebSocket :', error);

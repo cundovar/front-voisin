@@ -51,11 +51,23 @@ export const useMessagesStore = defineStore('messages', {
     },
 
     getMessagesBetween(senderId, recipientId) {
-      return this.messages.filter(
-        (msg) =>
-          (msg.sender === senderId && msg.recipient === recipientId) ||
-          (msg.sender === recipientId && msg.recipient === senderId)
-      );
+      senderId = Number(senderId); // Force les IDs à être des nombres
+      recipientId = Number(recipientId);
+    
+      console.log("Sender ID attendu :", senderId);
+      console.log("Recipient ID attendu :", recipientId);
+      console.log("this.messages:", this.messages);
+    
+      return this.messages.filter((msg) => {
+        console.log("Vérification du message :", msg);
+        console.log("Type de msg.sender :", typeof msg.sender, "Valeur :", msg.sender);
+        console.log("Type de msg.recipient :", typeof msg.recipient, "Valeur :", msg.recipient);
+    
+        return (
+          (Number(msg.sender) === senderId && Number(msg.recipient) === recipientId) ||
+          (Number(msg.sender) === recipientId && Number(msg.recipient) === senderId)
+        );
+      });
     },
     async loadMessages(objectId, recipientId) {
       try {
@@ -82,6 +94,7 @@ export const useMessagesStore = defineStore('messages', {
     },
     addMessage(message) {
       this.messages.push(message);
+      console.log("messi",message)
     },
   
 
